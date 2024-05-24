@@ -19,6 +19,8 @@ cfg["include_dirs"].append(np.get_include())
 twobody_path = os.path.dirname(twobody.__file__)
 cfg["include_dirs"].append(twobody_path)
 cfg["sources"].append(os.path.join(twobody_path, "src/twobody.c"))
+#cfg["include_dirs"].append('thejoker/src/twobody')
+#cfg["sources"].append(os.path.join('thejoker/src/twobody', "src/twobody.c"))
 
 cfg["extra_compile_args"].append("--std=gnu99")
 cfg["sources"].append("thejoker/src/fast_likelihood.pyx")

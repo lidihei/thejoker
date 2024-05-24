@@ -83,6 +83,7 @@ def make_full_samples_inmem(joker_helper, prior_samples_batch, rng, n_linear_sam
         t_ref=joker_helper.data.t_ref,
         poly_trend=joker_helper.prior.poly_trend,
         n_offsets=joker_helper.prior.n_offsets,
+        sb2_bool=joker_helper.prior._sb2 ## modified by lijiao
     )
 
     return samples

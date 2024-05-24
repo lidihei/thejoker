@@ -34,7 +34,7 @@ class JokerSamples:
     _hdf5_path = "samples"
 
     def __init__(
-        self, samples=None, t_ref=None, n_offsets=None, poly_trend=None, **kwargs
+        self, samples=None, t_ref=None, n_offsets=None, poly_trend=None, sb2_bool=False, **kwargs
     ):
         """
         A dictionary-like object for storing prior or posterior samples from
@@ -52,6 +52,8 @@ class JokerSamples:
             Specifies the number of coefficients in an additional polynomial
             velocity trend, meant to capture long-term trends in the data. See
             the docstring for `thejoker.JokerPrior` for more details.
+        sb2_bool : bool (optinal)
+            sb2_bool = True when samples for sb2
         t_ref : `astropy.time.Time`, numeric (optional)
             The reference time for the orbital parameters.
         **kwargs
@@ -63,6 +65,8 @@ class JokerSamples:
 
         if n_offsets is None:
             n_offsets = 0
+
+        self._sb2 = sb2_bool
 
         self.tbl = QTable()
         if isinstance(samples, (Row, Table, QTable)):
@@ -78,7 +82,7 @@ class JokerSamples:
 
         valid_units = {
             **get_nonlinear_equiv_units(),
-            **get_linear_equiv_units(poly_trend),
+            **get_linear_equiv_units(poly_trend, self._sb2),
             **get_v0_offsets_equiv_units(n_offsets),
         }
 
