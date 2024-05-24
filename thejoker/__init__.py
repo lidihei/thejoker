@@ -14,6 +14,11 @@ from .samples_analysis import (
 )
 from .thejoker import TheJoker
 
+# SB2:
+from .thejoker_sb2 import *
+from .prior_sb2 import JokerSB2Prior
+
+
 __all__ = [
     "__version__",
     "TheJoker",
