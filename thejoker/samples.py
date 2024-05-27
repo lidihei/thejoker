@@ -170,12 +170,12 @@ class JokerSamples:
 
     def __getitem__(self, key):
         if isinstance(key, int):
-            return self.__class__(samples=self.tbl[key])
+            return self.__class__(samples=self.tbl[key], n_offsets=self.n_offsets)
 
         if isinstance(key, str) and key in self.par_names:
             return self.tbl[key]
 
-        return self.__class__(samples=self.tbl[key])
+        return self.__class__(samples=self.tbl[key], n_offsets=self.n_offsets)
 
     def __setitem__(self, key, val):
         if key not in self._valid_units:
@@ -392,13 +392,15 @@ class JokerSamples:
         all samples"""
         return self._apply(np.std)
 
-    def wrap_K(self):
+    def wrap_K(self, Kname=None):
         """
         Change negative K values to positive K values and wrap omega to adjust
+        Kname: [str] e.g "K", "K1", "K2"
         """
-        mask = self.tbl["K"] < 0
+        if Kname is None: Kname = 'K'
+        mask = self.tbl[Kname] < 0
         if np.any(mask):
-            self.tbl["K"][mask] = np.abs(self.tbl["K"][mask])
+            self.tbl[Kname][mask] = np.abs(self.tbl[Kname][mask])
             self.tbl["omega"][mask] = self.tbl["omega"][mask] + np.pi * u.rad
             self.tbl["omega"][mask] = self.tbl["omega"][mask] % (2 * np.pi * u.rad)
 

@@ -16,7 +16,7 @@ __all__ = ['JokerSB2Prior']
 class JokerSB2Prior(JokerPrior):
     _sb2 = True
 
-    def __init__(self, pars=None, poly_trend=1, model=None):
+    def __init__(self, pars=None, poly_trend=1, v0_offsets=None, model=None):
         """
         This class controls the prior probability distributions for the
         parameters used in The Joker.
@@ -42,18 +42,22 @@ class JokerSB2Prior(JokerPrior):
             default here is ``polytrend=1``, meaning one term: the (constant)
             systemtic velocity. For example, ``poly_trend=3`` will sample over
             parameters of a long-term quadratic velocity trend.
-        model : `pymc3.Model`
+        v0_offsets : list (optional)
+            A list of additional Gaussian parameters that set systematic offsets
+            of subsets of the data. TODO: link to tutorial here
+        model : `pymc.Model`
             This is either required, or this function must be called within a
-            pymc3 model context.
+            pymc model context.
 
         """
-        super().__init__(pars=pars, poly_trend=poly_trend, model=model)
+        super().__init__(pars=pars, poly_trend=poly_trend, v0_offsets=v0_offsets,  model=model)
 
     @classmethod
     def default(cls, P_min=None, P_max=None,
                 sigma_K0_1=None, P0_1=1*u.year,
                 sigma_K0_2=None, P0_2=1*u.year,
                 sigma_v=None, s=None, poly_trend=1,
+                v0_offsets=None,
                 model=None, pars=None):
         r"""
         An alternative initializer to set up the default prior for The Joker.
@@ -127,7 +131,7 @@ class JokerSB2Prior(JokerPrior):
                                           pars=pars)
 
         pars = {**nl_pars, **l_pars}
-        obj = cls(pars=pars, model=model, poly_trend=poly_trend)
+        obj = cls(pars=pars, model=model,poly_trend=poly_trend, v0_offsets=v0_offsets)
 
         return obj
 
