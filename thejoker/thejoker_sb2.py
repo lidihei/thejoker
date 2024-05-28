@@ -226,7 +226,7 @@ class TheJokerSB2(TheJoker):
 
         with model:
             # Set up the orbit model for star1
-            orbit1 = KeplerianOrbit(
+            orbit = KeplerianOrbit(
                 period=p["P"],
                 ecc=p["e"],
                 omega=p["omega"],
@@ -237,6 +237,7 @@ class TheJokerSB2(TheJoker):
 
         # design matrix
         M = get_trend_design_matrix(data, ids, self.prior.poly_trend)
+        idx_star2 = np.array(ids) == 2
 
         # deal with v0_offsets, trend here:
         _, offset_names = validate_n_offsets(self.prior.n_offsets)
@@ -251,7 +252,10 @@ class TheJokerSB2(TheJoker):
             v_trend_vec = pt.stack(v_pars, axis=0)
             trend = pt.dot(M, v_trend_vec)
 
-            rv_model = orbit.get_radial_velocity(x, K=p["K"]) + trend
+            rv_model1 = orbit.get_radial_velocity(x, K=p["K1"])
+            rv_model2 = orbit.get_radial_velocity(x, K=p["K2"])
+            rv_value = np.hstack([rv_model1.eval()[~idx_star2], rv_model2.eval()[idx_star2]])
+            rv_model = rv_model1.fill(rv_value) + trend
             pm.Deterministic("model_rv", rv_model)
 
             err = pt.sqrt(err**2 + p["s"] ** 2)
