@@ -71,7 +71,7 @@ def validate_prepare_data_sb2(data, poly_trend, t_ref=None):
 
 class JokerSB2Samples(JokerSamples):
 
-    def __init__(self, samples=None, t_ref=None, poly_trend=None,
+    def __init__(self, samples=None, t_ref=None, poly_trend=None, sb2_bool=True,
                  **kwargs):
         """
         A dictionary-like object for storing prior or posterior samples from
@@ -89,14 +89,16 @@ class JokerSB2Samples(JokerSamples):
             Specifies the number of coefficients in an additional polynomial
             velocity trend, meant to capture long-term trends in the data. See
             the docstring for `thejoker.JokerPrior` for more details.
+        sb2_bool : bool (optinal)
+            sb2_bool = True for sampling rv1 and rv2 of sb2 binary.
         t_ref : `astropy.time.Time`, numeric (optional)
             The reference time for the orbital parameters.
         **kwargs
             Additional keyword arguments are stored internally as metadata.
         """
-        super().__init__(t_ref=t_ref, poly_trend=poly_trend, **kwargs)
-        self._valid_units['K1'] = self._valid_units.pop('K')
-        self._valid_units['K2'] = self._valid_units.get('K1')
+        super().__init__(t_ref=t_ref, poly_trend=poly_trend, sb2_bool=sb2_bool, **kwargs)
+        self._valid_units['K1'] = self._valid_units.pop('K1')
+        self._valid_units['K2'] = self._valid_units.get('K2')
 
         if samples is not None:
             _tbl = QTable(samples)
@@ -150,15 +152,16 @@ class TheJokerSB2(TheJoker):
         joker_helper = CJokerSB2Helper(all_data, self.prior, M)
         return joker_helper
 
-    def setup_mcmc(self, data, joker_samples, model=None, custom_func=None):
+    def setup_mcmc(self, datas, joker_samples, model=None, custom_func=None):
         """
         Setup the model to run MCMC using pymc.
 
         Parameters
         ----------
-        data : `~thejoker.RVData`
-            The radial velocity data, or an iterable containing ``RVData``
-            objects for each data source.
+        datas [dic] : `~thejoker.RVData`
+            e.g. datas = {'1': <RVData: 10 epochs>, '2': <RVData: 8 epochs>}
+            The dictionary of radial velocity data of star1 and star2, 
+            or an iterable containing ``RVData`` objects for each data source.
         joker_samples : `~thejoker.JokerSamples`
             If a single sample is passed in, this is packed into a pymc
             initialization dictionary and returned after setting up. If
@@ -184,11 +187,17 @@ class TheJokerSB2(TheJoker):
 
         # Reduce data, strip units:
         data, ids, _ = validate_prepare_data_sb2(
-            data, self.prior.poly_trend, t_ref=None
+            datas, self.prior.poly_trend, t_ref=None
         )
         x = data._t_bmjd - data._t_ref_bmjd
         y = data.rv.value
         err = data.rv_err.to_value(data.rv.unit)
+        x1 = datas["1"]._t_bmjd - data._t_ref_bmjd
+        y1 = datas["1"].rv.value
+        err1 = datas["1"].rv_err.to_value(data.rv.unit)
+        x2 = datas["2"]._t_bmjd - data._t_ref_bmjd
+        y2 = datas["2"].rv.value
+        err2 = datas["2"].rv_err.to_value(data.rv.unit)
 
         # First, prepare the joker_samples:
         if not isinstance(joker_samples, JokerSamples):
@@ -237,7 +246,8 @@ class TheJokerSB2(TheJoker):
 
         # design matrix
         M = get_trend_design_matrix(data, ids, self.prior.poly_trend)
-        idx_star2 = np.array(ids) == 2
+        idx_star2 = np.array(ids) == '2'
+        #print('idx_star2: ', idx_star2)
 
         # deal with v0_offsets, trend here:
         _, offset_names = validate_n_offsets(self.prior.n_offsets)
@@ -252,20 +262,24 @@ class TheJokerSB2(TheJoker):
             v_trend_vec = pt.stack(v_pars, axis=0)
             trend = pt.dot(M, v_trend_vec)
 
-            rv_model1 = orbit.get_radial_velocity(x, K=p["K1"])
-            rv_model2 = orbit.get_radial_velocity(x, K=p["K2"])
-            rv_value = np.hstack([rv_model1.eval()[~idx_star2], rv_model2.eval()[idx_star2]])
-            rv_model = rv_model1.fill(rv_value) + trend
-            pm.Deterministic("model_rv", rv_model)
+            rv_model1 = orbit.get_radial_velocity(x1, K=p["K1"])+trend[~idx_star2]
+            rv_model2 = -orbit.get_radial_velocity(x2, K=p["K2"])+trend[idx_star2]
+            #rv_value = np.hstack([rv_model1.eval()[~idx_star2], rv_model2.eval()[idx_star2]])
+            #rv_model = rv_model1.fill(rv_value) + trend
+            pm.Deterministic("model_rv1", rv_model1)
+            pm.Deterministic("model_rv2", rv_model2)
 
             err = pt.sqrt(err**2 + p["s"] ** 2)
-            pm.Normal("obs", mu=rv_model, sigma=err, observed=y)
+            pm.Normal("obs1", mu=rv_model1, sigma=err1, observed=y1)
+            pm.Normal("obs2", mu=rv_model2, sigma=err2, observed=y2)
 
             pm.Deterministic("logp", model.logp())
 
-            dist = pm.Normal.dist(model.model_rv, data.rv_err.value)
+            #dist = pm.Normal.dist(model.model_rv1, data.rv_err.value)
+            dist1 = pm.Normal.dist(model.model_rv1, err1)
+            dist2 = pm.Normal.dist(model.model_rv2, err2)
             lnlike = pm.Deterministic(
-                "ln_likelihood", pm.logp(dist, data.rv.value).sum(axis=-1)
+                "ln_likelihood", pm.logp(dist1, y1).sum(axis=-1)+pm.logp(dist2, y2).sum(axis=-1)
             )
 
             pm.Deterministic("ln_prior", model.logp() - lnlike)

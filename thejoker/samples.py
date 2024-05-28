@@ -53,7 +53,7 @@ class JokerSamples:
             velocity trend, meant to capture long-term trends in the data. See
             the docstring for `thejoker.JokerPrior` for more details.
         sb2_bool : bool (optinal)
-            sb2_bool = True when samples for sb2
+            sb2_bool = True for sampling rv1 and rv2 of sb2 binary. 
         t_ref : `astropy.time.Time`, numeric (optional)
             The reference time for the orbital parameters.
         **kwargs
@@ -136,8 +136,8 @@ class JokerSamples:
             poly_trend=prior.poly_trend,
             n_offsets=prior.n_offsets,
             t_ref=data.t_ref,
+            sb2_bool=prior._sb2
         )
-
         names = prior.par_names
 
         for name in names:
@@ -170,12 +170,12 @@ class JokerSamples:
 
     def __getitem__(self, key):
         if isinstance(key, int):
-            return self.__class__(samples=self.tbl[key], n_offsets=self.n_offsets)
+            return self.__class__(samples=self.tbl[key], n_offsets=self.n_offsets, sb2_bool=self._sb2)
 
         if isinstance(key, str) and key in self.par_names:
             return self.tbl[key]
 
-        return self.__class__(samples=self.tbl[key], n_offsets=self.n_offsets)
+        return self.__class__(samples=self.tbl[key], n_offsets=self.n_offsets, sb2_bool=self._sb2)
 
     def __setitem__(self, key, val):
         if key not in self._valid_units:
@@ -612,7 +612,8 @@ class JokerSamples:
 
     def copy(self):
         """Return a copy of this instance"""
-        return self.__class__(self.tbl.copy(), t_ref=self.t_ref)
+        return self.__class__(self.tbl.copy(), t_ref=self.t_ref, n_offsets=self.n_offsets, 
+               poly_trend=self.poly_trend, sb2_bool=self._sb2)
 
     def ln_unmarginalized_likelihood(self, data):
         """

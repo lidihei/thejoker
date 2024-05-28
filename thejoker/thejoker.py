@@ -257,7 +257,7 @@ class TheJoker:
                 return_all_logprobs=return_all_logprobs,
                 SamplesCls=self._samples_cls,
             )
-
+        samples._sb2 = prior_samples._sb2
         return samples
 
     def iterative_rejection_sample(

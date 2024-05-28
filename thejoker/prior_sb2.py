@@ -207,7 +207,7 @@ class JokerSB2Prior(JokerPrior):
 
             if return_logprobs:
                 s['ln_prior'] = log_prior
-
+            s._sb2 = self._sb2 
             prior_samples.append(s)
 
         # Secondary argument of pericenter:
@@ -220,6 +220,7 @@ class JokerSB2Prior(JokerPrior):
         # log_prior = {k: np.atleast_1d(v)
         #              for k, v in log_prior.items()}
         # log_prior = Table(log_prior)[par_names]
+        
 
         return prior_samples
 
