@@ -409,7 +409,7 @@ class JokerSamples:
             self.tbl["omega"][mask] = self.tbl["omega"][mask] % (2 * np.pi * u.rad)
             tab = self.tbl[mask]
             self.tbl["M0"][mask] = KeplerianOrbit.P_omega_ecc2M0(tab["P"].value,
-                                   tab["omega"].value, tab["e"])* u.radian
+                                   tab["omega"].value, tab["e"].value)* u.radian
             if sb2_bool:
                Kname='K2'; self.tbl[Kname][mask] = np.abs(self.tbl[Kname][mask])
         return self
