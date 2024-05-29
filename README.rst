@@ -16,7 +16,7 @@ Authors
 - **Adrian Price-Whelan** (Flatiron Institute)
 - **David W. Hogg** (NYU, MPIA, & Flatiron Institute)
 - **Dan Foreman-Mackey** (Flatiron Institute)
-- ** Jiao Li (Yunan Observatories, CAS E-mail: lijiao@bao.ac.cn; lijiao@ynao.ac.cn)
+- **Jiao Li (Yunan Observatories, CAS E-mail: lijiao@bao.ac.cn; lijiao@ynao.ac.cn)
 
 Installation
 ------------
