@@ -10,6 +10,7 @@ import numpy as np
 from astropy.table import QTable, Row, Table, meta, serialize
 from astropy.time import Time
 from twobody import KeplerOrbit, PolynomialRVTrend
+from ._keplerian_orbit import KeplerianOrbit
 
 # Project
 from thejoker.src.fast_likelihood import (
@@ -53,7 +54,7 @@ class JokerSamples:
             velocity trend, meant to capture long-term trends in the data. See
             the docstring for `thejoker.JokerPrior` for more details.
         sb2_bool : bool (optinal)
-            sb2_bool = True for sampling rv1 and rv2 of sb2 binary. 
+            sb2_bool = True for sampling rv1 and rv2 of sb2 binary.
         t_ref : `astropy.time.Time`, numeric (optional)
             The reference time for the orbital parameters.
         **kwargs
@@ -406,6 +407,9 @@ class JokerSamples:
             self.tbl[Kname][mask] = np.abs(self.tbl[Kname][mask])
             self.tbl["omega"][mask] = self.tbl["omega"][mask] + np.pi * u.rad
             self.tbl["omega"][mask] = self.tbl["omega"][mask] % (2 * np.pi * u.rad)
+            tab = self.tbl[mask]
+            self.tbl["M0"][mask] = KeplerianOrbit.P_omega_ecc2M0(tab["P"].value,
+                                   tab["omega"].value, tab["e"])* u.radian
             if sb2_bool:
                Kname='K2'; self.tbl[Kname][mask] = np.abs(self.tbl[Kname][mask])
         return self

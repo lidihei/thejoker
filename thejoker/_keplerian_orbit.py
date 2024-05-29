@@ -782,6 +782,29 @@ class KeplerianOrbit:
         return orbit
 
 
+    @classmethod
+    def P_omega_ecc2M0(cls, P, omega, e):
+        '''
+         Obtain the mean anomaly at epoch ``t0`` by using orbital period,
+          Argument of pericenter (omega) and eccentric (e).
+         P : [float] (in day)
+            Orbital period.
+         e : [float] (in unit)
+            Orbital eccentricity. Default is circular, ``e=0``.
+         omega : [float] [in rad]
+            Argument of pericenter.
+        '''
+        n = 2*np.pi/P
+        cos_omega = np.cos(omega)
+        sin_omega = np.sin(omega)
+        opsw = 1 + sin_omega
+        E0 = 2 * np.arctan2(
+                np.sqrt(1 - e) * cos_omega,
+                np.sqrt(1 + e) * opsw,
+            )
+        M0 = E0 - e * np.sin(E0)
+        return M0
+
 def get_true_anomaly(M, e, **kwargs):
     """Get the true anomaly for a tensor of mean anomalies and eccentricities
 
