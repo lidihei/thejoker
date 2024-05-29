@@ -392,18 +392,22 @@ class JokerSamples:
         all samples"""
         return self._apply(np.std)
 
-    def wrap_K(self, Kname=None):
+    def wrap_K(self, Kname=None, sb2_bool=None):
         """
         Change negative K values to positive K values and wrap omega to adjust
         Kname: [str] e.g "K", "K1", "K2"
+        sb2_bool: [bool] if True wrape K1 and K2 of sb2 binary
         """
-        if Kname is None: Kname = 'K'
+        if sb2_bool is None: sb2_bool=self._sb2
+        if Kname is None:
+           Kname = 'K1' if sb2_bool else 'K'
         mask = self.tbl[Kname] < 0
         if np.any(mask):
             self.tbl[Kname][mask] = np.abs(self.tbl[Kname][mask])
             self.tbl["omega"][mask] = self.tbl["omega"][mask] + np.pi * u.rad
             self.tbl["omega"][mask] = self.tbl["omega"][mask] % (2 * np.pi * u.rad)
-
+            if sb2_bool:
+               Kname='K2'; self.tbl[Kname][mask] = np.abs(self.tbl[Kname][mask])
         return self
 
     # Packing and unpacking

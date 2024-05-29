@@ -317,7 +317,7 @@ class JokerPrior:
             )
         }
 
-        # MAJOR HACK RELATED TO UPSTREAM ISSUES WITH pymc3:
+        # MAJOR HACK RELATED TO UPSTREAM ISSUES WITH pymc:
         # init_shapes = {}
         # for name, par in sub_pars.items():
         #     if hasattr(par, "distribution"):
@@ -350,7 +350,7 @@ class JokerPrior:
         else:
             log_prior = None
 
-        # CONTINUED MAJOR HACK RELATED TO UPSTREAM ISSUES WITH pymc3:
+        # CONTINUED MAJOR HACK RELATED TO UPSTREAM ISSUES WITH pymc:
         # for name, par in sub_pars.items():
         #     if hasattr(par, "distribution"):
         #         par.distribution.shape = init_shapes[name]

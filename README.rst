@@ -8,6 +8,7 @@ The Joker [YO-ker]
 
 
 A custom Monte Carlo sampler for the two-body problem.
+The version is improved to deal with the double-line spectroscopic binary (SB2)
 
 Authors
 -------
@@ -15,6 +16,7 @@ Authors
 - **Adrian Price-Whelan** (Flatiron Institute)
 - **David W. Hogg** (NYU, MPIA, & Flatiron Institute)
 - **Dan Foreman-Mackey** (Flatiron Institute)
+- ** Jiao Li (Yunan Observatories, CAS E-mail: lijiao@bao.ac.cn; lijiao@ynao.ac.cn)
 
 Installation
 ------------
@@ -26,6 +28,11 @@ To install the latest stable release, use `pip`::
 To install the development version::
 
     pip install git+https://github.com/adrn/thejoker
+
+To install the sb2 version::
+   
+    git clone https://github.com/lidihei/thejoker.git
+    pip install .
 
 Attribution
 -----------

@@ -160,7 +160,7 @@ class TheJokerSB2(TheJoker):
         ----------
         datas [dic] : `~thejoker.RVData`
             e.g. datas = {'1': <RVData: 10 epochs>, '2': <RVData: 8 epochs>}
-            The dictionary of radial velocity data of star1 and star2, 
+            The dictionary of radial velocity datas of star1 and star2, 
             or an iterable containing ``RVData`` objects for each data source.
         joker_samples : `~thejoker.JokerSamples`
             If a single sample is passed in, this is packed into a pymc
@@ -192,9 +192,11 @@ class TheJokerSB2(TheJoker):
         x = data._t_bmjd - data._t_ref_bmjd
         y = data.rv.value
         err = data.rv_err.to_value(data.rv.unit)
+        # times and rvs of star1
         x1 = datas["1"]._t_bmjd - data._t_ref_bmjd
         y1 = datas["1"].rv.value
         err1 = datas["1"].rv_err.to_value(data.rv.unit)
+        # times and rvs of star2
         x2 = datas["2"]._t_bmjd - data._t_ref_bmjd
         y2 = datas["2"].rv.value
         err2 = datas["2"].rv_err.to_value(data.rv.unit)
@@ -242,7 +244,6 @@ class TheJokerSB2(TheJoker):
                 t_periastron=model.named_vars["t_peri"],
             )
 
-        # design matrix
 
         # design matrix
         M = get_trend_design_matrix(data, ids, self.prior.poly_trend)
@@ -262,10 +263,9 @@ class TheJokerSB2(TheJoker):
             v_trend_vec = pt.stack(v_pars, axis=0)
             trend = pt.dot(M, v_trend_vec)
 
+            # radial velocity models of star1 and star2
             rv_model1 = orbit.get_radial_velocity(x1, K=p["K1"])+trend[~idx_star2]
             rv_model2 = -orbit.get_radial_velocity(x2, K=p["K2"])+trend[idx_star2]
-            #rv_value = np.hstack([rv_model1.eval()[~idx_star2], rv_model2.eval()[idx_star2]])
-            #rv_model = rv_model1.fill(rv_value) + trend
             pm.Deterministic("model_rv1", rv_model1)
             pm.Deterministic("model_rv2", rv_model2)
 
@@ -275,9 +275,10 @@ class TheJokerSB2(TheJoker):
 
             pm.Deterministic("logp", model.logp())
 
-            #dist = pm.Normal.dist(model.model_rv1, data.rv_err.value)
+            #likelihoods of star1 and star2, assuming Gaussian distributons
             dist1 = pm.Normal.dist(model.model_rv1, err1)
             dist2 = pm.Normal.dist(model.model_rv2, err2)
+            #dist = dist1* dist2
             lnlike = pm.Deterministic(
                 "ln_likelihood", pm.logp(dist1, y1).sum(axis=-1)+pm.logp(dist2, y2).sum(axis=-1)
             )

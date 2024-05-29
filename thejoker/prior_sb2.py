@@ -32,7 +32,7 @@ class JokerSB2Prior(JokerPrior):
         Parameters
         ----------
         pars : dict, list (optional)
-            Either a list of pymc3 variables, or a dictionary of variables with
+            Either a list of pymc variables, or a dictionary of variables with
             keys set to the variable names. If any of these variables are
             defined as deterministic transforms from other variables, see the
             next parameter below.
@@ -110,11 +110,11 @@ class JokerSB2Prior(JokerPrior):
         v0_offsets : list (optional)
             A list of additional Gaussian parameters that set systematic offsets
             of subsets of the data. TODO: link to tutorial here
-        model : `pymc3.Model` (optional)
+        model : `pymc.Model` (optional)
             If not specified, this will create a model instance and store it on
             the prior object.
         pars : dict, list (optional)
-            Either a list of pymc3 variables, or a dictionary of variables with
+            Either a list of pymc variables, or a dictionary of variables with
             keys set to the variable names. If any of these variables are
             defined as deterministic transforms from other variables, see the
             next parameter below.
@@ -146,7 +146,7 @@ class JokerSB2Prior(JokerPrior):
         .. note::
 
             Right now, generating samples with the prior values is slow (i.e.
-            with ``return_logprobs=True``) because of pymc3 issues (see
+            with ``return_logprobs=True``) because of pymc issues (see
             discussion here:
             https://discourse.pymc.io/t/draw-values-speed-scaling-with-transformed-variables/4076).
             This will hopefully be resolved in the future...
@@ -231,7 +231,7 @@ def default_linear_prior_sb2(sigma_K0_1=None, P0_1=None,
                              sigma_v=None,
                              poly_trend=1, model=None, pars=None):
     r"""
-    Retrieve pymc3 variables that specify the default prior on the linear
+    Retrieve pymc variables that specify the default prior on the linear
     parameters of The Joker. See docstring of `JokerPrior.default()` for more
     information.
 
@@ -251,8 +251,8 @@ def default_linear_prior_sb2(sigma_K0_1=None, P0_1=None,
     sigma_K0_2 : `~astropy.units.Quantity` [speed]
     P0_2 : `~astropy.units.Quantity` [time]
     sigma_v : iterable of `~astropy.units.Quantity`
-    model : `pymc3.Model`
-        This is either required, or this function must be called within a pymc3
+    model : `pymc.Model`
+        This is either required, or this function must be called within a pymc
         model context.
     """
     #import pymc as pm
