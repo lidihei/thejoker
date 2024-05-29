@@ -139,7 +139,7 @@ class JokerSB2Prior(JokerPrior):
         return f'<JokerSB2Prior [{", ".join(self.par_names)}]>'
 
     def sample(self, size=1, generate_linear=False, return_logprobs=False,
-               random_state=None, dtype=None, **kwargs):
+               rng=None, dtype=None, **kwargs):
         """
         Generate random samples from the prior.
 
@@ -173,7 +173,7 @@ class JokerSB2Prior(JokerPrior):
         import thejoker.units as xu
 
         raw_samples, sub_pars, log_prior = self._get_raw_samples(
-            size, generate_linear, return_logprobs, random_state, dtype,
+            size, generate_linear, return_logprobs, rng, dtype,
             **kwargs)
 
         if generate_linear:
@@ -219,8 +219,7 @@ class JokerSB2Prior(JokerPrior):
         # like here:
         # log_prior = {k: np.atleast_1d(v)
         #              for k, v in log_prior.items()}
-        # log_prior = Table(log_prior)[par_names]
-        
+        # log_prior = Table(log_prior)[par_names] 
 
         return prior_samples
 
